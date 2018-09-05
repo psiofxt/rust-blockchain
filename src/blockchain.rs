@@ -26,6 +26,7 @@ struct Blockchain {
 
 
 impl Blockchain {
+
     fn new_block(&self, proof: String, previous_hash: String) {
         // define the block and append it to the chain
         let block = Block {
@@ -38,5 +39,18 @@ impl Blockchain {
         let self.current_transactions = [];
         self.chain.push(block)
         block;
+    }
+
+    fn new_transaction(&self, sender: String, recipient: String, amount: f32) {
+        let transaction = Transaction {
+            sender: sender,
+            recipient: recipient,
+            amount: amount,
+        }
+        self.current_transactions.push(transaction)
+    }
+
+    fn first_name(&self) -> &u32 {
+        &self.chain.len()
     }
 }
