@@ -3,8 +3,8 @@ use std::collections::HashSet;
 struct Block {
     index: i32,
     timestamp: String,
-    transactions: String,
-    proof: String,
+    transactions: Vec<HashSet<Transaction>>,
+    proof: i32,
     previous_hash: String
 }
 
@@ -26,7 +26,17 @@ struct Blockchain {
 
 
 impl Blockchain {
-    fn new_block(proof: String, previous_hash: String) {
+    fn new_block(&self, proof: String, previous_hash: String) {
         // define the block and append it to the chain
+        let block = Block {
+            index: self.chain.len(),
+            timestamp: String::("1"),
+            transactions: self.current_transactions,
+            proof: proof,
+            previous_hash: previous_hash,
+        }
+        let self.current_transactions = [];
+        self.chain.push(block)
+        block;
     }
 }
