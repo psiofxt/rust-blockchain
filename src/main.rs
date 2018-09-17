@@ -1,4 +1,4 @@
-//mod blockchain;
+mod blockchain;
 
 #[macro_use]
 extern crate tower_web;
@@ -29,10 +29,11 @@ struct CreatedResponse {
 impl_web! {
     impl JsonResource {
 
-        #[get("/")]
+        #[get("/chain")]
         #[content_type("application/json")]
         fn stats(&self) -> Result<Response, ()> {
             // TODO: display current stats
+            // blockchain::Blockchain::new_block();
             Ok(Response {
                 message: "blockchain info"
             })

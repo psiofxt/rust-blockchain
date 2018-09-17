@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 
 struct Block {
-    index: i32,
+    index: u32,
     timestamp: String,
-    transactions: Vec<HashSet<Transaction>>,
-    proof: i32,
+    transactions: u32,
+    proof: String,
     previous_hash: String
 }
 
@@ -18,39 +18,38 @@ struct Node {
 
 }
 
-struct Blockchain {
-    chain: Vec<HashSet<Block>>,
-    current_transactions: Vec<HashSet<Transaction>>,
+pub struct Blockchain {
+    chain: Vec<Block>,
+    current_transactions: Vec<Transaction>,
     nodes: Vec<HashSet<Node>>,
 }
 
 
 impl Blockchain {
 
-    fn new_block(&self, proof: String, previous_hash: String) {
+    pub fn new_block(&mut self, proof: String, previous_hash: String){
         // define the block and append it to the chain
         let block = Block {
-            index: self.chain.len(),
-            timestamp: String::("1"),
-            transactions: self.current_transactions,
+            index: 1,
+            timestamp: String::from("1"),
+            transactions: 1,
             proof: proof,
             previous_hash: previous_hash,
-        }
-        let self.current_transactions = [];
-        self.chain.push(block)
-        block;
+        };
+        // let self.current_transactions = [];
+        self.chain.push(block);
     }
 
-    fn new_transaction(&self, sender: String, recipient: String, amount: f32) {
+    fn new_transaction(&mut self, sender: String, recipient: String, amount: f32) {
         let transaction = Transaction {
             sender: sender,
             recipient: recipient,
             amount: amount,
-        }
-        self.current_transactions.push(transaction)
+        };
+        &mut self.current_transactions.push(transaction);
     }
 
-    fn first_name(&self) -> &u32 {
-        &self.chain.len()
+    fn first_name(&self) -> usize {
+        self.chain.len()
     }
 }
