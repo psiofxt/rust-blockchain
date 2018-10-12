@@ -5,6 +5,7 @@ extern crate url;
 #[macro_use]
 extern crate log;
 extern crate env_logger;
+<<<<<<< HEAD
 
 #[macro_use]
 extern crate serde_json;
@@ -49,6 +50,22 @@ fn handle_404() -> FutureResult<hyper::Response, hyper::Error> {
     futures::future::ok(response)
 }
 
+=======
+
+//use hyper::{StatusCode};
+//use hyper::Method::{Get, Post};
+use hyper::server::{Request, Response, Service};
+//use hyper::header::{ContentLength, ContentType};
+
+//use futures::Stream;
+use futures::future::{Future};
+
+mod blockchain;
+use blockchain::{Blockchain, init};
+
+
+struct Microservice;
+>>>>>>> Migrate to lower level hyper
 
 impl Service for Microservice {
     type Request = Request;
@@ -56,6 +73,7 @@ impl Service for Microservice {
     type Error = hyper::Error;
     type Future = Box<Future<Item = Self::Response, Error = Self::Error>>;
     fn call(&self, request: Request) -> Self::Future {
+<<<<<<< HEAD
         match (request.method(), request.path()) {
             (&Get, "/") => {
                 info!("Microservice received a request: {:?}", request);
@@ -67,6 +85,10 @@ impl Service for Microservice {
                 Box::new(response)
             }
         }
+=======
+        info!("Microservice received a request: {:?}", request);
+        Box::new(futures::future::ok(Response::new()))
+>>>>>>> Migrate to lower level hyper
     }
 }
 
@@ -77,10 +99,16 @@ fn main() {
     let server = hyper::server::Http::new()
         .bind(&address, move || Ok(Microservice))
         .unwrap();
+<<<<<<< HEAD
     let mut chain: Blockchain = init();
     chain.new_block(String::from("1"), String::from("NULL"));
     info!("Blockchain: {:?}", chain);
     info!("Running microservice at {}", address);
     info!("~~Bockchain service successfully started~~");
+=======
+    let chain: Blockchain = init();
+    info!("Blockchain: {:?}", chain);
+    info!("Running microservice at {}", address);
+>>>>>>> Migrate to lower level hyper
     server.run().unwrap();
 }
