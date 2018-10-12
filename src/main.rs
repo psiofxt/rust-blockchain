@@ -1,80 +1,45 @@
-mod blockchain;
+extern crate hyper;
+extern crate futures;
+extern crate url;
 
 #[macro_use]
-extern crate tower_web;
-extern crate tokio;
+extern crate log;
+extern crate env_logger;
 
-//#[macro_use]
-//extern crate serde_json;
+//use hyper::{StatusCode};
+//use hyper::Method::{Get, Post};
+use hyper::server::{Request, Response, Service};
+//use hyper::header::{ContentLength, ContentType};
 
-use tower_web::ServiceBuilder;
+//use futures::Stream;
+use futures::future::{Future};
 
-#[derive(Clone, Debug)]
-struct JsonResource;
+mod blockchain;
+use blockchain::{Blockchain, init};
 
-#[derive(Debug, Response)]
-struct Response {
-    message: &'static str
-}
 
-#[derive(Debug, Response)]
-#[web(status = "201")]
-struct CreatedResponse {
-    message: &'static str,
+struct Microservice;
 
-    #[web(header)]
-    x_my_header: &'static str,
-}
-
-impl_web! {
-    impl JsonResource {
-
-        #[get("/chain")]
-        #[content_type("application/json")]
-        fn stats(&self) -> Result<Response, ()> {
-            // TODO: display current stats
-            // blockchain::Blockchain::new_block();
-            Ok(Response {
-                message: "blockchain info"
-            })
-        }
-
-        #[post("/nodes/register")]
-        #[content_type("application/json")]
-        fn register_node(&self) -> Result<Response, ()> {
-            // TODO: register a new node
-            Ok(Response {
-                message: "node registered!!"
-            })
-        }
-
-        #[post("/mine")]
-        #[content_type("application/json")]
-        fn mine(&self) -> Result<CreatedResponse, ()> {
-            // TODO: impl mining method + proof
-            Ok(CreatedResponse {
-                message: "mined a block",
-                x_my_header: "awesome",
-            })
-        }
-
-        #[get("/nodes/resolve")]
-        #[content_type("application/json")]
-        fn resolve_nodes(&self) -> Result<Response, ()> {
-            // TODO: resolve longest chain
-            Ok(Response {
-                message: "nodes resolved!"
-            })
-        }
+impl Service for Microservice {
+    type Request = Request;
+    type Response = Response;
+    type Error = hyper::Error;
+    type Future = Box<Future<Item = Self::Response, Error = Self::Error>>;
+    fn call(&self, request: Request) -> Self::Future {
+        info!("Microservice received a request: {:?}", request);
+        Box::new(futures::future::ok(Response::new()))
     }
 }
 
-pub fn main() {
-    let addr = "127.0.0.1:8080".parse().expect("Invalid address");
-    println!("Listening on http://{}", addr);
 
-    ServiceBuilder::new()
-        .resource(JsonResource)
-        .run(&addr)
+fn main() {
+    env_logger::init();
+    let address = "127.0.0.1:8080".parse().unwrap();
+    let server = hyper::server::Http::new()
+        .bind(&address, move || Ok(Microservice))
         .unwrap();
+    let chain: Blockchain = init();
+    info!("Blockchain: {:?}", chain);
+    info!("Running microservice at {}", address);
+    server.run().unwrap();
 }
