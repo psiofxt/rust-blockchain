@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+#[derive(Debug)]
 struct Block {
     index: u32,
     timestamp: String,
@@ -8,25 +9,42 @@ struct Block {
     previous_hash: String
 }
 
+#[derive(Debug)]
 struct Transaction {
     sender: String,
     recipient: String,
     amount: f32
 }
 
+#[derive(Debug)]
 struct Node {
 
 }
 
+#[derive(Debug)]
 pub struct Blockchain {
     chain: Vec<Block>,
-    current_transactions: Vec<Transaction>,
-    nodes: Vec<HashSet<Node>>,
+    current_transactions: Vec<Transaction>
+}
+
+impl Default for Blockchain {
+    fn default() -> Blockchain {
+        Blockchain {
+            chain: Vec::<Block>::new(),
+            current_transactions: Vec::<Transaction>::new()
+        }
+    }
+}
+
+pub fn init() -> Blockchain{
+    Blockchain {
+        chain: Default::default(),
+        current_transactions: Default::default()
+    }
 }
 
 
 impl Blockchain {
-
     pub fn new_block(&mut self, proof: String, previous_hash: String){
         // define the block and append it to the chain
         let block = Block {
@@ -49,7 +67,7 @@ impl Blockchain {
         &mut self.current_transactions.push(transaction);
     }
 
-    fn first_name(&self) -> usize {
+    fn last_block(&self) -> usize {
         self.chain.len()
     }
 }
