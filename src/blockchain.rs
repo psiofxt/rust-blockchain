@@ -67,7 +67,7 @@ impl Blockchain {
         &mut self.current_transactions.push(transaction);
     }
 
-    fn first_name(&self) -> usize {
+    fn last_block(&self) -> usize {
         self.chain.len()
     }
 }

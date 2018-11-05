@@ -77,7 +77,8 @@ fn main() {
     let server = hyper::server::Http::new()
         .bind(&address, move || Ok(Microservice))
         .unwrap();
-    let chain: Blockchain = init();
+    let mut chain: Blockchain = init();
+    chain.new_block(String::from("1"), String::from("NULL"));
     info!("Blockchain: {:?}", chain);
     info!("Running microservice at {}", address);
     info!("~~Bockchain service successfully started~~");
