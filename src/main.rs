@@ -18,7 +18,7 @@ use hyper::header::{ContentLength, ContentType};
 use futures::future::{Future, FutureResult};
 
 mod blockchain;
-use blockchain::{Blockchain, init};
+use blockchain::{Blockchain};
 
 
 struct Microservice;
@@ -50,6 +50,15 @@ fn handle_404() -> FutureResult<hyper::Response, hyper::Error> {
 }
 
 
+impl Microservice {
+    fn new_chain(&self) -> Blockchain{
+        Blockchain::new()
+        //b::new_block(String::from("test"), String::from("test"));
+        //b
+    }
+}
+
+
 impl Service for Microservice {
     type Request = Request;
     type Response = Response;
@@ -58,6 +67,9 @@ impl Service for Microservice {
     fn call(&self, request: Request) -> Self::Future {
         match (request.method(), request.path()) {
             (&Get, "/") => {
+                let mut chain: Blockchain = self.new_chain();
+                Blockchain::new_block(&mut chain, String::from("test"), String::from("test"));
+                info!("Blockchain: {:?}", chain);
                 info!("Microservice received a request: {:?}", request);
                 Box::new(futures::future::ok(Response::new()))
             }
@@ -77,9 +89,9 @@ fn main() {
     let server = hyper::server::Http::new()
         .bind(&address, move || Ok(Microservice))
         .unwrap();
-    let mut chain: Blockchain = init();
-    chain.new_block(String::from("1"), String::from("NULL"));
-    info!("Blockchain: {:?}", chain);
+    //let mut chain: Blockchain = Blockchain::new();
+    //chain.new_block(String::from("1"), String::from("NULL"));
+    //info!("Blockchain: {:?}", chain);
     info!("Running microservice at {}", address);
     info!("~~Bockchain service successfully started~~");
     info!("Blockchain: {:?}", chain);

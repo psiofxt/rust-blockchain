@@ -1,15 +1,16 @@
 use std::collections::HashSet;
+use std::time::{SystemTime, UNIX_EPOCH, Duration};
 
 #[derive(Debug)]
 struct Block {
-    index: u32,
-    timestamp: String,
-    transactions: u32,
+    index: usize,
+    timestamp: Duration,
+    transactions: Vec<Transaction>,
     proof: String,
     previous_hash: String
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Transaction {
     sender: String,
     recipient: String,
@@ -36,25 +37,26 @@ impl Default for Blockchain {
     }
 }
 
-pub fn init() -> Blockchain{
-    Blockchain {
-        chain: Default::default(),
-        current_transactions: Default::default()
-    }
-}
-
 
 impl Blockchain {
+    pub fn new() -> Blockchain{
+        Blockchain {
+            chain: Default::default(),
+            current_transactions: Default::default()
+        }
+    }
+
     pub fn new_block(&mut self, proof: String, previous_hash: String){
         // define the block and append it to the chain
-        let block = Block {
-            index: 1,
-            timestamp: String::from("1"),
-            transactions: 1,
+        //let current_transactions: Vec<Transaction> = self.current_transactions.clone();
+        let block: Block = Block {
+            index: self.chain.len() + 1,
+            timestamp: SystemTime::now().duration_since(UNIX_EPOCH).unwrap(),
+            transactions: self.current_transactions.clone(),
             proof: proof,
             previous_hash: previous_hash,
         };
-        // let self.current_transactions = [];
+        self.current_transactions = Vec::<Transaction>::new();
         self.chain.push(block);
     }
 
