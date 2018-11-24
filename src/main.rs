@@ -105,7 +105,5 @@ fn main() {
         .unwrap();
     info!("Running microservice at {}", address);
     info!("~~Bockchain service successfully started~~");
-    info!("Blockchain: {:?}", chain);
-    info!("Running microservice at {}", address);
     server.run().unwrap();
 }
