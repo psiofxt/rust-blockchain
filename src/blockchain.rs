@@ -51,7 +51,7 @@ impl Blockchain {
         }
     }
 
-    pub fn new_block(&mut self) -> Result<(), ()>{
+    pub fn new_block(&mut self) -> Block {
         // define the block and append it to the chain
         let clone_chain = self.clone();
         let last_block = clone_chain.last_block();
@@ -76,9 +76,10 @@ impl Blockchain {
             proof: proof,
             previous_hash: previous_hash,
         };
+        let block_resp = block.clone();
         self.current_transactions = Vec::<Transaction>::new();
         self.chain.push(block);
-        Ok(())
+        block_resp
     }
 
     fn new_transaction(&mut self, sender: String, recipient: String, amount: f32) {

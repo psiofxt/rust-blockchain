@@ -24,7 +24,7 @@ use hyper::header::{ContentLength, ContentType};
 use futures::future::{Future, FutureResult};
 
 mod blockchain;
-use blockchain::{Blockchain};
+use blockchain::{Blockchain, Block};
 
 mod proof;
 
@@ -70,8 +70,14 @@ impl<> Service for Microservice<> {
         match (request.method(), request.path()) {
             (&Get, "/mine") => {
                 let mut c = self.chain.try_write().unwrap();
-                Blockchain::new_block(&mut c).expect("failed to mine");
-                Box::new(futures::future::ok(Response::new()))
+                let ref new_block: Block = Blockchain::new_block(&mut c);
+                let payload = json!({
+                    "new_block": new_block}).to_string();
+                let response: Response = Response::new()
+                    .with_header(ContentLength(payload.len() as u64))
+                    .with_header(ContentType::json())
+                    .with_body(payload);
+                Box::new(futures::future::ok(response))
             }
             (&Get, "/chain") => {
                 let payload = json!(self.chain).to_string();
