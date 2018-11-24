@@ -9,19 +9,29 @@ extern crate env_logger;
 #[macro_use]
 extern crate serde_json;
 
+#[macro_use]
+extern crate serde_derive;
+
+extern crate crypto;
+
+use std::sync::{RwLock};
+
 use hyper::{StatusCode};
 use hyper::Method::{Get};
 use hyper::server::{Request, Response, Service};
 use hyper::header::{ContentLength, ContentType};
 
-//use futures::Stream;
 use futures::future::{Future, FutureResult};
 
 mod blockchain;
-use blockchain::{Blockchain, init};
+use blockchain::{Blockchain, Block};
+
+mod proof;
 
 
-struct Microservice;
+struct Microservice<> {
+    chain: RwLock<Blockchain>
+}
 
 fn make_error_response(error_message: &str) -> FutureResult<hyper::Response, hyper::Error> {
     let payload = json!({
@@ -50,16 +60,32 @@ fn handle_404() -> FutureResult<hyper::Response, hyper::Error> {
 }
 
 
-impl Service for Microservice {
+impl<> Service for Microservice<> {
     type Request = Request;
     type Response = Response;
     type Error = hyper::Error;
     type Future = Box<Future<Item = Self::Response, Error = Self::Error>>;
     fn call(&self, request: Request) -> Self::Future {
+        info!("Microservice received a request: {:?}", request);
         match (request.method(), request.path()) {
-            (&Get, "/") => {
-                info!("Microservice received a request: {:?}", request);
-                Box::new(futures::future::ok(Response::new()))
+            (&Get, "/mine") => {
+                let mut c = self.chain.try_write().unwrap();
+                let ref new_block: Block = Blockchain::new_block(&mut c);
+                let payload = json!({
+                    "new_block": new_block}).to_string();
+                let response: Response = Response::new()
+                    .with_header(ContentLength(payload.len() as u64))
+                    .with_header(ContentType::json())
+                    .with_body(payload);
+                Box::new(futures::future::ok(response))
+            }
+            (&Get, "/chain") => {
+                let payload = json!(self.chain).to_string();
+                let response: Response = Response::new()
+                    .with_header(ContentLength(payload.len() as u64))
+                    .with_header(ContentType::json())
+                    .with_body(payload);
+                Box::new(futures::future::ok(response))
             }
             _ => {
                 info!("Route not found: {:?}", request.path());
@@ -75,11 +101,8 @@ fn main() {
     env_logger::init();
     let address = "127.0.0.1:8080".parse().unwrap();
     let server = hyper::server::Http::new()
-        .bind(&address, move || Ok(Microservice))
+        .bind(&address, move || Ok(Microservice {chain: RwLock::new(Blockchain::new())}))
         .unwrap();
-    let mut chain: Blockchain = init();
-    chain.new_block(String::from("1"), String::from("NULL"));
-    info!("Blockchain: {:?}", chain);
     info!("Running microservice at {}", address);
     info!("~~Bockchain service successfully started~~");
     server.run().unwrap();
